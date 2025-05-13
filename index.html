@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NutriMood App</title>
+  <style>
+    body { font-family: Arial; background: #f0f8ff; padding: 20px; }
+    h1, h2 { color: #4caf50; }
+    .section { margin-bottom: 30px; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, select, button, textarea { padding: 8px; margin-top: 10px; width: 100%; }
+    button { background: #4caf50; color: white; border: none; cursor: pointer; }
+    #chatbox { height: 100px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background: #f9f9f9; }
+    .music-option { margin: 5px 0; }
+  </style>
+</head>
+<body>
+
+  <h1>NutriMood 🌿</h1>
+
+  <!-- Personal Info -->
+  <div class="section">
+    <h2>👤 Personal Info</h2>
+    <label>Age: <input type="number" id="age"></label>
+    <label>Height (cm): <input type="number" id="height"></label>
+    <label>Weight (kg): <input type="number" id="weight"></label>
+  </div>
+
+  <!-- Mood-based Meals -->
+  <div class="section">
+    <h2>🍽️ Mood-Based Meal Suggestion</h2>
+    <label>Select Mood:
+      <select id="mood">
+        <option value="happy">Happy</option>
+        <option value="sad">Sad</option>
+        <option value="tired">Tired</option>
+        <option value="stressed">Stressed</option>
+        <option value="anxious">Anxious</option>
+      </select>
+    </label>
+    <button onclick="suggestMeal()">Get Meal Suggestion</button>
+    <p id="mealSuggestion"></p>
+  </div>
+
+  <!-- Water Tracker -->
+  <div class="section">
+    <h2>💧 Water Tracker</h2>
+    <p>Glasses today: <span id="waterCount">0</span></p>
+    <button onclick="addWater()">+1 Glass</button>
+  </div>
+
+  <!-- Mood Booster Tips -->
+  <div class="section">
+    <h2>🌈 Mood Booster Tip</h2>
+    <button onclick="getTip()">Get Tip</button>
+    <p id="tipResult"></p>
+  </div>
+
+  <!-- Mood Journal -->
+  <div class="section">
+    <h2>📔 Mood Journal</h2>
+    <label for="journalMood">Today's Mood:</label>
+    <input type="text" id="journalMood" placeholder="e.g., Calm, Angry, Excited">
+    <label for="journalEntry">Write about your day:</label>
+    <textarea id="journalEntry" rows="4" placeholder="How are you feeling today?"></textarea>
+    <button onclick="saveJournal()">Save Entry</button>
+    <div id="journalOutput"></div>
+  </div>
+
+  <!-- Mood-Based Music Suggestions -->
+  <div class="section">
+    <h2>🎵 Mood Music</h2>
+    <div class="music-option"><button onclick="playMusic('calm')">Calm Me Down</button></div>
+    <div class="music-option"><button onclick="playMusic('focus')">Help Me Focus</button></div>
+    <div class="music-option"><button onclick="playMusic('energy')">Boost My Mood</button></div>
+    <audio id="musicPlayer" controls style="width:100%; display:none;"></audio>
+  </div>
+
+  <!-- Weekly Meal Plan -->
+  <div class="section">
+    <h2>🗓️ Weekly Meal Planner</h2>
+    <button onclick="generateMealPlan()">Generate Plan</button>
+    <ul id="mealPlanList"></ul>
+  </div>
+
+  <!-- Chatbot -->
+  <div class="section">
+    <h2>🧠 MindEase AI Chatbot</h2>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Type a message...">
+    <button onclick="chat()">Send</button>
+  </div>
+
+  <script>
+    let water = 0;
+    let journalEntries = [];
+
+    function addWater() {
+      water++;
+      document.getElementById("waterCount").innerText = water;
+    }
+
+    function suggestMeal() {
+      const mood = document.getElementById("mood").value;
+      const age = parseInt(document.getElementById("age").value);
+      const weight = parseInt(document.getElementById("weight").value);
+
+      let calories = 2000;
+      if (age && weight) {
+        if (age < 13) calories = 1600;
+        else if (age < 18) calories = 1800;
+        else calories = 2000 + Math.floor((weight - 50) * 10);
+      }
+
+      let meal = "";
+      if (mood === "happy") meal = "Grilled chicken salad with avocado toast.";
+      else if (mood === "sad") meal = "Warm lentil soup with whole-grain bread.";
+      else if (mood === "tired") meal = "Oats with bananas and nuts.";
+      else if (mood === "stressed") meal = "Salmon with quinoa and steamed broccoli.";
+      else if (mood === "anxious") meal = "Herbal tea and brown rice with vegetables.";
+
+      document.getElementById("mealSuggestion").innerText = `Suggested Meal (${calories} kcal): ${meal}`;
+    }
+
+    function getTip() {
+      const tips = [
+        "Take a short walk outside 🌳",
+        "Drink some herbal tea 🍵",
+        "Try deep breathing for 2 minutes 🧘",
+        "Listen to your favorite music 🎵",
+        "Stretch for 5 minutes 💪"
+      ];
+      const tip = tips[Math.floor(Math.random() * tips.length)];
+      document.getElementById("tipResult").innerText = tip;
+    }
+
+    function saveJournal() {
+      const mood = document.getElementById("journalMood").value;
+      const entry = document.getElementById("journalEntry").value;
+      if (mood && entry) {
+        journalEntries.push({ mood, entry });
+        document.getElementById("journalOutput").innerHTML += `<p><b>${mood}</b>: ${entry}</p>`;
+        document.getElementById("journalMood").value = "";
+        document.getElementById("journalEntry").value = "";
+      }
+    }
+
+    function generateMealPlan() {
+      const meals = [
+        "Veggie stir-fry with brown rice",
+        "Baked salmon with sweet potato",
+        "Grilled tofu with quinoa",
+        "Turkey wrap with hummus",
+        "Chickpea curry with basmati rice",
+        "Whole grain pasta with spinach pesto",
+        "Fruit smoothie bowl with seeds"
+      ];
+      const list = document.getElementById("mealPlanList");
+      list.innerHTML = "";
+      for (let i = 0; i < 7; i++) {
+        const li = document.createElement("li");
+        li.textContent = `Day ${i + 1}: ${meals[i]}`;
+        list.appendChild(li);
+      }
+    }
+
+    function playMusic(type) {
+      const player = document.getElementById("musicPlayer");
+      let src = "";
+      if (type === "calm") src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+      else if (type === "focus") src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
+      else if (type === "energy") src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3";
+      player.src = src;
+      player.style.display = "block";
+      player.play();
+    }
+
+    function chat() {
+      const input = document.getElementById("userInput").value;
+      const chatbox = document.getElementById("chatbox");
+      const reply = getBotReply(input.toLowerCase());
+      chatbox.innerHTML += `<p><b>You:</b> ${input}</p><p><b>Bot:</b> ${reply}</p>`;
+      document.getElementById("userInput").value = "";
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function getBotReply(msg) {
+      if (msg.includes("sad") || msg.includes("depressed")) return "I'm here for you 💖. Try writing down 3 things you're grateful for.";
+      if (msg.includes("stressed")) return "Take a deep breath. You've got this! Would a short walk help?";
+      if (msg.includes("happy")) return "That's awesome! Keep spreading those good vibes 🌞";
+      return "Tell me more. I'm listening.";
+    }
+  </script>
+</body>
+</html>
